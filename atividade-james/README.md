@@ -2,7 +2,7 @@
 
 Aplicação web e API HTTP em Python 3.10+ para classificar textos em **positivo**, **neutro** ou **negativo**. Compara uma baseline clássica de PLN lexical com Gemini usando prompt few-shot e saída JSON estruturada. A interface e a API são servidas pelo mesmo processo, com a biblioteca padrão do Python.
 
-A pasta `frontend/` fica ao lado de `atividade-james/`, dentro da pasta que contém os dois componentes. Preserve essa estrutura ao copiar o projeto.
+A interface fica em [`frontend/`](frontend/), dentro de `atividade-james/`.
 
 ## Executar
 

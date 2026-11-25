@@ -1,13 +1,12 @@
 # Como executar o frontend
 
-Requisito: Python 3.10 ou superior. Após extrair o ZIP, mantenha as pastas `frontend/` e `atividade-james/` lado a lado. O backend serve a interface no mesmo processo que atende a API.
+Requisito: Python 3.10 ou superior. O backend serve a interface da pasta `frontend/` no mesmo processo que atende a API.
 
 ## Iniciar a aplicação
 
-Abra um terminal na pasta `frontend/` e execute:
+Abra um terminal na pasta `atividade-james/` e execute:
 
 ```bash
-cd ../atividade-james
 python3 -m sentiment_backend.api
 ```
 

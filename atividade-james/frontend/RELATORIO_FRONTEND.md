@@ -18,7 +18,7 @@ O JavaScript valida textos vazios e o limite de 5.000 caracteres. O estado da an
 
 ## 3. Integração com o backend
 
-A pasta `frontend/` fica ao lado de `atividade-james/`. O backend Python serve o HTML em `/` e entrega o CSS e o JavaScript na mesma origem da API.
+A pasta `frontend/` fica dentro de `atividade-james/`. O backend Python serve o HTML em `/` e entrega o CSS e o JavaScript na mesma origem da API.
 
 | Rota | Uso na interface |
 | --- | --- |
@@ -29,10 +29,9 @@ O método clássico funciona sem chave. A comparação usa a variável `GEMINI_A
 
 ## 4. Execução local
 
-Execute a partir da pasta `frontend/`.
+Execute a partir da pasta `atividade-james/`.
 
 ```bash
-cd ../atividade-james
 python3 -m sentiment_backend.api
 ```
 

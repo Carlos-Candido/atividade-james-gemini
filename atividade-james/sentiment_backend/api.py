@@ -9,7 +9,7 @@ from .llm import ErroLLM
 from .servico import EntradaInvalida, analisar_lote
 
 TAMANHO_MAXIMO = 256 * 1024
-DIRETORIO_FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
+DIRETORIO_FRONTEND = Path(__file__).resolve().parents[1] / "frontend"
 RECURSOS_FRONTEND = {
     "/": ("index.html", "text/html"),
     "/styles.css": ("styles.css", "text/css"),
