@@ -84,6 +84,22 @@ class BackendTestes(unittest.TestCase):
             with self.assertRaises(ErroLLM):
                 Gemini("chave-falsa").analisar("texto")
 
+    def test_comparacao_com_deepseek(self):
+        dados = {"choices": [{"finish_reason": "stop", "message": {
+            "content": '{"sentimento":"positivo","justificativa":"elogio"}',
+        }}]}
+        with patch.dict("os.environ", {"DEEPSEEK_API_KEY": "chave-falsa"}, clear=True), \
+                patch("sentiment_backend.llm.request.urlopen", return_value=RespostaFalsa(dados)) as abrir:
+            resposta = analisar_lote({"modo": "comparar", "mensagens": [{"texto": "Excelente!"}]})
+            requisicao = abrir.call_args.args[0]
+            self.assertEqual(requisicao.full_url, "https://api.deepseek.com/chat/completions")
+            self.assertEqual(requisicao.get_header("Authorization"), "Bearer chave-falsa")
+            self.assertEqual(resposta["resultados"][0]["llm"]["sentimento"], "positivo")
+            dados["choices"][0]["message"]["content"] = " "
+            resposta = analisar_lote({"modo": "comparar", "mensagens": [{"texto": "Excelente!"}]})
+            self.assertIsNone(resposta["resultados"][0]["concordam"])
+            self.assertIn("erro", resposta["resultados"][0]["llm"])
+
     def test_http_json(self):
         def chamar(corpo):
             handler = Handler.__new__(Handler)

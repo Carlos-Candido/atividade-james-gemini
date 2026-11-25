@@ -31,6 +31,8 @@ $env:GEMINI_MODEL = "gemini-3.8-flash"  # opcional
 python -m sentiment_backend.api
 ```
 
+Para usar DeepSeek, defina `DEEPSEEK_API_KEY` no backend. No Bash, veja as [instruções de execução do frontend](frontend/COMO_EXECUTAR.md). O modelo padrão é `deepseek-flash`, ajustável por `DEEPSEEK_MODEL`. Se ambas as chaves estiverem configuradas, DeepSeek tem prioridade.
+
 Não grave a chave no código ou em arquivos versionados. Para usar só o método clássico, nenhuma chave ou conexão externa é necessária.
 
 ## Enviar JSON

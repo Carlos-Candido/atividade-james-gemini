@@ -14,7 +14,8 @@ const analysisErrorDetails = document.querySelector("#analysis-error-details");
 const analysisErrorMessage = analysisErrorDetails?.querySelector("p");
 
 let comparisonAvailable = false;
-let comparisonNotice = "Verificando disponibilidade do Gemini…";
+let comparisonNotice = "Verificando disponibilidade do modelo…";
+let providerName = "modelo de IA";
 let healthChecking = false;
 let analysisInProgress = false;
 let textValidationAttempted = false;
@@ -62,7 +63,7 @@ function validateText(text, length) {
 function updateModeGuidance() {
   modeGuidance.textContent = comparisonNotice || (
     selectedMode() === "comparar"
-      ? "Se o Gemini falhar, o resultado clássico continua disponível."
+      ? `Se ${providerName} falhar, o resultado clássico continua disponível.`
       : "A análise clássica está disponível."
   );
 }
@@ -71,7 +72,7 @@ function updateModeGuidance() {
 async function checkHealth() {
   if (healthChecking || analysisInProgress) return;
   healthChecking = true;
-  comparisonNotice = "Verificando disponibilidade do Gemini…";
+  comparisonNotice = "Verificando disponibilidade do modelo…";
   comparisonAvailable = false;
   compareMode.disabled = true;
   updateModeGuidance();
@@ -93,16 +94,11 @@ async function checkHealth() {
       throw new Error("Resposta inválida do backend");
     }
 
-    const providerCompatible = !Object.prototype.hasOwnProperty.call(body, "llm_provedor")
-      || body.llm_provedor === "gemini";
-    if (!providerCompatible) {
-      comparisonNotice = "A comparação não está disponível com o provedor configurado.";
-    } else {
-      comparisonAvailable = body.llm_configurado;
-      comparisonNotice = comparisonAvailable
-        ? ""
-        : "A comparação não está disponível: Gemini não configurado.";
-    }
+    providerName = body.llm_provedor === "deepseek" ? "DeepSeek" : "Gemini";
+    comparisonAvailable = body.llm_configurado;
+    comparisonNotice = comparisonAvailable
+      ? ""
+      : "A comparação não está disponível: nenhuma chave de API configurada.";
   } catch {
     comparisonAvailable = false;
     comparisonNotice = "Backend indisponível. Verifique a conexão e recarregue a página.";
@@ -260,12 +256,12 @@ function createClassicComparisonCard(classic) {
   return card;
 }
 
-function createGeminiComparisonCard(llm) {
-  const card = createResultCard("Análise com Gemini", hasLlmError(llm) ? null : llm.sentimento);
+function createLlmComparisonCard(llm) {
+  const card = createResultCard(`Análise com ${providerName}`, hasLlmError(llm) ? null : llm.sentimento);
   if (hasLlmError(llm)) {
     const error = document.createElement("p");
     error.className = "result-error";
-    error.textContent = "Gemini indisponível nesta análise.";
+    error.textContent = `${providerName} indisponível nesta análise.`;
 
     const details = document.createElement("details");
     details.className = "error-details";
@@ -332,13 +328,13 @@ function renderResults(body, mode) {
   comparison.className = "result-comparison";
   comparison.append(
     createClassicComparisonCard(classic),
-    createGeminiComparisonCard(result.llm),
+    createLlmComparisonCard(result.llm),
   );
   resultContent.classList.add("is-comparing");
   resultContent.replaceChildren(summary, comparison);
 
   if (result.concordam === null) {
-    setAnalysisStatus("Análise clássica concluída; Gemini indisponível nesta análise.", "success");
+    setAnalysisStatus(`Análise clássica concluída; ${providerName} indisponível nesta análise.`, "success");
   } else {
     setAnalysisStatus(
       result.concordam
@@ -392,11 +388,11 @@ form.addEventListener("submit", async (event) => {
 
   const mode = selectedMode();
   if (mode === "comparar" && healthChecking) {
-    setFormError("A disponibilidade do Gemini ainda está sendo verificada. Aguarde e tente novamente.");
+    setFormError("A disponibilidade do modelo ainda está sendo verificada. Aguarde e tente novamente.");
     return;
   }
   if (mode === "comparar" && !comparisonAvailable) {
-    setFormError("A comparação com Gemini não está disponível. Verifique a conexão.");
+    setFormError("A comparação não está disponível. Verifique a conexão.");
     return;
   }
 
