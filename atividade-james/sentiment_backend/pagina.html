@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teste de análise de sentimentos</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #243044; background: #f3f5f9; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 28px 18px 60px; }
+    main { max-width: 1000px; margin: auto; }
+    h1 { margin: 0 0 8px; font-size: clamp(1.7rem, 4vw, 2.4rem); }
+    h2 { margin: 0 0 16px; font-size: 1.2rem; }
+    p { line-height: 1.5; }
+    .intro { color: #526074; margin: 0 0 22px; }
+    .panel { background: #fff; border: 1px solid #dce3ed; border-radius: 14px; padding: 20px; margin-top: 18px; box-shadow: 0 4px 20px #1d31500b; }
+    .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .status { display: inline-block; border-radius: 999px; background: #edf1f7; padding: 7px 11px; color: #45546a; font-size: .9rem; }
+    label { display: block; font-weight: 650; margin-bottom: 8px; }
+    textarea { width: 100%; min-height: 270px; resize: vertical; border: 1px solid #b9c5d6; border-radius: 9px; padding: 14px; color: #1d2a3b; background: #fcfdff; font: .92rem/1.5 ui-monospace, Consolas, monospace; }
+    textarea:focus, button:focus-visible { outline: 3px solid #93bcf4; outline-offset: 2px; }
+    button { border: 0; border-radius: 9px; padding: 11px 20px; color: white; background: #155bb8; font-weight: 700; cursor: pointer; }
+    button:hover { background: #0d498f; }
+    button:disabled { opacity: .65; cursor: wait; }
+    .hint { color: #66748a; font-size: .9rem; margin: 9px 0 0; }
+    .error { color: #a12727; font-weight: 650; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 12px; }
+    .metric { background: #f6f8fc; border-radius: 10px; padding: 14px; }
+    .metric strong { display: block; font-size: 1.55rem; margin-top: 4px; }
+    .cards { display: grid; gap: 12px; }
+    .card { border: 1px solid #dce3ed; border-radius: 10px; padding: 15px; }
+    .card p { margin: 7px 0; }
+    .small { color: #66748a; font-size: .88rem; }
+    .badge { display: inline-block; margin: 4px 7px 4px 0; padding: 5px 9px; border-radius: 7px; font-size: .86rem; font-weight: 700; }
+    .positivo { background: #dff5e9; color: #13683b; }
+    .negativo { background: #ffe7e4; color: #a12c24; }
+    .neutro { background: #e9edf2; color: #43546b; }
+    .falha { background: #fff0cd; color: #805100; }
+    pre { overflow: auto; max-height: 360px; margin: 0; padding: 14px; border-radius: 9px; background: #172338; color: #f0f5fb; font-size: .83rem; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Análise de sentimentos</h1>
+    <p class="intro">Página local para testar o backend. Edite o JSON, envie e veja o resumo e cada classificação.</p>
+
+    <section class="panel" aria-label="Entrada da análise">
+      <div class="toolbar"><span id="chave" class="status">Verificando configuração do Gemini...</span></div>
+      <label for="entrada">Requisição JSON</label>
+      <textarea id="entrada" spellcheck="false">{
+  "modo": "classico",
+  "mensagens": [
+    {"id": "1", "produto": "Fone", "texto": "Som excelente e entrega rápida."},
+    {"id": "2", "produto": "Fone", "texto": "Chegou quebrado e a bateria é ruim."},
+    {"id": "3", "produto": "Mouse", "texto": "O pacote chegou ontem."}
+  ]
+}</textarea>
+      <p class="hint">Para comparar com Gemini, configure GEMINI_API_KEY no servidor e altere o modo para "comparar".</p>
+      <p id="erro" class="error" role="alert" hidden></p>
+      <button id="enviar" type="button">Analisar mensagens</button>
+    </section>
+
+    <section id="resumo-panel" class="panel" hidden>
+      <h2>Resumo</h2>
+      <div id="resumo" class="grid"></div>
+      <div id="produtos"></div>
+    </section>
+
+    <section id="resultados-panel" class="panel" hidden>
+      <h2>Mensagens analisadas</h2>
+      <div id="resultados" class="cards"></div>
+    </section>
+
+    <section id="json-panel" class="panel" hidden>
+      <h2>Resposta JSON completa</h2>
+      <pre id="saida"></pre>
+    </section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const badge = (metodo, resultado) => {
+      const el = document.createElement('span');
+      const rotulo = resultado.sentimento || 'falha';
+      el.className = `badge ${rotulo}`;
+      el.textContent = `${metodo}: ${rotulo}`;
+      return el;
+    };
+    const metric = (nome, valor) => {
+      const el = document.createElement('div');
+      el.className = 'metric';
+      const titulo = document.createElement('span');
+      titulo.textContent = nome;
+      const numero = document.createElement('strong');
+      numero.textContent = valor;
+      el.append(titulo, numero);
+      return el;
+    };
+    const percentual = (valor) => valor === null || valor === undefined ? '—' : `${valor}%`;
+
+    function mostrar(dados) {
+      $('resumo').replaceChildren();
+      $('produtos').replaceChildren();
+      $('resultados').replaceChildren();
+      $('resumo').append(metric('Mensagens', dados.resumo.total));
+      for (const metodo of ['classico', 'llm']) {
+        const info = dados.resumo[metodo];
+        if (!info) continue;
+        $('resumo').append(metric(`Positivas · ${metodo}`, info.distribuicao.positivo.quantidade));
+        $('resumo').append(metric(`Neutras · ${metodo}`, info.distribuicao.neutro.quantidade));
+        $('resumo').append(metric(`Negativas · ${metodo}`, info.distribuicao.negativo.quantidade));
+        $('resumo').append(metric(`Satisfação · ${metodo}`, percentual(info.satisfacao_percentual)));
+      }
+      if (dados.resumo.comparacao) {
+        $('resumo').append(metric('Concordância', percentual(dados.resumo.comparacao.taxa_concordancia === null ? null : Math.round(dados.resumo.comparacao.taxa_concordancia * 100))));
+      }
+      if (dados.resumo.por_produto) {
+        const titulo = document.createElement('h2');
+        titulo.style.marginTop = '24px';
+        titulo.textContent = 'Por produto';
+        $('produtos').append(titulo);
+        for (const [produto, info] of Object.entries(dados.resumo.por_produto)) {
+          const linha = document.createElement('p');
+          const partes = [`${produto}: ${info.total} mensagem(ns)`];
+          for (const metodo of ['classico', 'llm']) {
+            if (info[metodo]) partes.push(`${metodo}: ${percentual(info[metodo].satisfacao_percentual)} positivas`);
+          }
+          linha.textContent = partes.join(' · ');
+          $('produtos').append(linha);
+        }
+      }
+      for (const item of dados.resultados) {
+        const card = document.createElement('article');
+        card.className = 'card';
+        const titulo = document.createElement('strong');
+        titulo.textContent = item.produto ? `${item.id} · ${item.produto}` : item.id;
+        const texto = document.createElement('p');
+        texto.textContent = item.texto;
+        card.append(titulo, texto);
+        for (const metodo of ['classico', 'llm']) {
+          if (item[metodo]) card.append(badge(metodo, item[metodo]));
+          if (item[metodo]?.erro) {
+            const erro = document.createElement('p');
+            erro.className = 'small';
+            erro.textContent = item[metodo].erro;
+            card.append(erro);
+          }
+        }
+        if (item.concordam !== undefined && item.concordam !== null) {
+          const comparacao = document.createElement('p');
+          comparacao.className = 'small';
+          comparacao.textContent = item.concordam ? 'Os métodos concordam.' : 'Os métodos discordam.';
+          card.append(comparacao);
+        }
+        $('resultados').append(card);
+      }
+      $('saida').textContent = JSON.stringify(dados, null, 2);
+      for (const id of ['resumo-panel', 'resultados-panel', 'json-panel']) $(id).hidden = false;
+    }
+
+    $('enviar').addEventListener('click', async () => {
+      $('erro').hidden = true;
+      $('enviar').disabled = true;
+      $('enviar').textContent = 'Analisando...';
+      try {
+        const corpo = JSON.parse($('entrada').value);
+        const resposta = await fetch('/analisar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(corpo)
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok) throw new Error(dados.erro || `HTTP ${resposta.status}`);
+        mostrar(dados);
+      } catch (erro) {
+        $('erro').textContent = erro instanceof SyntaxError ? `JSON inválido: ${erro.message}` : erro.message;
+        $('erro').hidden = false;
+      } finally {
+        $('enviar').disabled = false;
+        $('enviar').textContent = 'Analisar mensagens';
+      }
+    });
+
+    fetch('/saude').then(r => r.json()).then(dados => {
+      $('chave').textContent = dados.llm_configurado ? 'Gemini configurado' : 'Modo clássico disponível · Gemini sem chave';
+    }).catch(() => { $('chave').textContent = 'Não foi possível consultar o estado do servidor'; });
+  </script>
+</body>
+</html>

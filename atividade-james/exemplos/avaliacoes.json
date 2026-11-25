@@ -1,0 +1,9 @@
+{
+  "modo": "classico",
+  "mensagens": [
+    {"id": "1", "produto": "Fone sem fio", "texto": "Som excelente e entrega rápida. Recomendo!", "referencia": "positivo"},
+    {"id": "2", "produto": "Fone sem fio", "texto": "A bateria é ruim e o produto chegou quebrado.", "referencia": "negativo"},
+    {"id": "3", "produto": "Fone sem fio", "texto": "O pacote chegou na terça-feira.", "referencia": "neutro"},
+    {"id": "4", "produto": "Fone sem fio", "texto": "O som é bom, mas o acabamento é ruim.", "referencia": "neutro"}
+  ]
+}

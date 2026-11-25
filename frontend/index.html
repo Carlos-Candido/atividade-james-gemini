@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0d1018">
+    <meta name="description" content="Analise avaliações e compare os métodos clássico e Gemini.">
+    <title>Análise de sentimentos</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <main id="conteudo" class="page-shell" tabindex="-1">
+      <section class="intro" aria-labelledby="titulo-principal">
+        <p class="eyebrow">ESTAÇÃO DE ANÁLISE</p>
+        <h1 id="titulo-principal">Análise de sentimentos</h1>
+        <p class="intro-copy">Identifique o tom de uma avaliação e compare a leitura do léxico com a do Gemini.</p>
+      </section>
+
+      <div class="workspace">
+        <section class="input-section" aria-labelledby="entrada-titulo">
+          <div class="panel-heading">
+            <p class="eyebrow">01 / ENTRADA</p>
+            <h2 id="entrada-titulo">Texto e método</h2>
+            <p class="panel-description">Insira uma avaliação por vez.</p>
+          </div>
+          <form id="analysis-form" novalidate>
+            <div class="field-heading">
+              <label for="analysis-text">Texto para analisar</label>
+              <button id="use-example" class="text-button" type="button">Usar exemplo</button>
+            </div>
+            <textarea id="analysis-text" name="texto" rows="7" autocomplete="off" spellcheck="true" placeholder="Cole uma avaliação…" aria-describedby="text-guidance text-count"></textarea>
+            <div class="field-meta">
+              <p id="text-guidance" class="field-hint">Até 5.000 caracteres.</p>
+              <p id="text-count" class="character-count">0 / 5.000</p>
+            </div>
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+
+            <fieldset id="mode-options" class="mode-options">
+              <legend>Método de análise</legend>
+              <div class="mode-grid">
+                <label class="mode-choice">
+                  <input type="radio" name="modo" value="classico" checked>
+                  <span class="mode-copy">
+                    <span class="mode-title">Clássico</span>
+                    <span class="mode-description">Usa um léxico local. Nenhuma chamada externa.</span>
+                  </span>
+                </label>
+                <label class="mode-choice">
+                  <input id="compare-mode" type="radio" name="modo" value="comparar" disabled>
+                  <span class="mode-copy">
+                    <span class="mode-title">Comparar</span>
+                    <span class="mode-description">Também envia o texto ao Gemini.</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+            <p id="mode-guidance" class="mode-guidance" role="status" aria-live="polite">Verificando disponibilidade do Gemini…</p>
+            <button id="analyze-button" class="button button-primary" type="submit">
+              <span>Analisar</span>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" focusable="false">
+                <path d="M3.5 9h10m-4-4 4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </form>
+        </section>
+
+        <section class="results-section" aria-labelledby="resultados-titulo">
+          <div class="panel-heading">
+            <p class="eyebrow">02 / RESULTADOS</p>
+            <h2 id="resultados-titulo">Leitura da avaliação</h2>
+            <p class="panel-description">Veja o sentimento, as evidências e a comparação entre métodos.</p>
+          </div>
+          <p id="analysis-status" class="analysis-status" role="status" aria-live="polite">Cole uma avaliação e selecione Analisar para ver a leitura aqui.</p>
+          <div class="state-decoration" aria-hidden="true"></div>
+          <details id="analysis-error-details" class="error-details" hidden>
+            <summary>Detalhes do erro</summary>
+            <p></p>
+          </details>
+          <div id="result-content" class="result-content"></div>
+        </section>
+      </div>
+      <footer class="page-footer">
+        <span>Seu texto não é salvo pelo navegador.</span>
+        <span>Aplicação local</span>
+      </footer>
+    </main>
+
+  </body>
+</html>
