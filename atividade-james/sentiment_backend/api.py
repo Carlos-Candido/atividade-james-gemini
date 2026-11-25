@@ -5,7 +5,7 @@ import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from .llm import ErroLLM, selecionar_llm
+from .llm import ErroLLM
 from .servico import EntradaInvalida, analisar_lote
 
 TAMANHO_MAXIMO = 256 * 1024
@@ -48,8 +48,7 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(corpo)
         elif self.path == "/saude":
-            llm = selecionar_llm()
-            self.responder(200, {"status": "ok", "llm_configurado": bool(llm.chave), "llm_provedor": llm.provedor})
+            self.responder(200, {"status": "ok", "llm_configurado": bool(os.getenv("GEMINI_API_KEY"))})
         else:
             self.responder(404, {"erro": "Rota não encontrada"})
 

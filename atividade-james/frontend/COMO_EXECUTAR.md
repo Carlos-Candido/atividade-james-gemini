@@ -27,14 +27,6 @@ python3 -m sentiment_backend.api
 
 Recarregue a página e selecione **Comparar**.
 
-Para usar DeepSeek no lugar de Gemini, execute:
-
-```bash
-read -rsp 'Chave da DeepSeek: ' DEEPSEEK_API_KEY
-printf '\n'
-DEEPSEEK_API_KEY="$DEEPSEEK_API_KEY" python3 -m sentiment_backend.api
-```
-
 ## Rodar os testes
 
 Em outro terminal, dentro de `atividade-james/`, execute:

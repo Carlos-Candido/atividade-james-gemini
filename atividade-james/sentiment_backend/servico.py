@@ -3,7 +3,7 @@
 from collections import Counter
 
 from . import classico
-from .llm import DeepSeek, ErroLLM, Gemini, ROTULOS, selecionar_llm
+from .llm import ErroLLM, Gemini, ROTULOS
 
 
 class EntradaInvalida(ValueError):
@@ -49,12 +49,11 @@ def _distribuicao(rotulos: list[str]) -> dict:
     }
 
 
-def analisar_lote(dados: object, llm: Gemini | DeepSeek | None = None) -> dict:
+def analisar_lote(dados: object, llm: Gemini | None = None) -> dict:
     mensagens, modo = validar(dados)
-    if modo != "classico":
-        llm = llm if llm is not None else selecionar_llm()
-        if not llm.chave:
-            raise ErroLLM("Configure DEEPSEEK_API_KEY ou GEMINI_API_KEY, ou use o modo classico")
+    if modo != "classico" and not (llm or Gemini()).chave:
+        raise ErroLLM("GEMINI_API_KEY não configurada; use modo classico ou configure a chave")
+    llm = llm or Gemini()
     resultados = []
     for item in mensagens:
         resultado = {"id": item["id"], "texto": item["texto"]}

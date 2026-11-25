@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0d1018">
-    <meta name="description" content="Analise avaliações e compare o método clássico com um modelo de IA.">
+    <meta name="description" content="Analise avaliações e compare os métodos clássico e Gemini.">
     <title>Análise de sentimentos</title>
     <link rel="stylesheet" href="/styles.css">
     <script src="/app.js" defer></script>
@@ -16,7 +16,7 @@
       <section class="intro" aria-labelledby="titulo-principal">
         <p class="eyebrow">ESTAÇÃO DE ANÁLISE</p>
         <h1 id="titulo-principal">Análise de sentimentos</h1>
-        <p class="intro-copy">Identifique o tom de uma avaliação e compare a leitura do léxico com a de um modelo de IA.</p>
+        <p class="intro-copy">Identifique o tom de uma avaliação e compare a leitura do léxico com a do Gemini.</p>
       </section>
 
       <div class="workspace">
@@ -52,12 +52,12 @@
                   <input id="compare-mode" type="radio" name="modo" value="comparar" disabled>
                   <span class="mode-copy">
                     <span class="mode-title">Comparar</span>
-                    <span class="mode-description">Também envia o texto ao provedor de IA configurado.</span>
+                    <span class="mode-description">Também envia o texto ao Gemini.</span>
                   </span>
                 </label>
               </div>
             </fieldset>
-            <p id="mode-guidance" class="mode-guidance" role="status" aria-live="polite">Verificando disponibilidade do modelo…</p>
+            <p id="mode-guidance" class="mode-guidance" role="status" aria-live="polite">Verificando disponibilidade do Gemini…</p>
             <button id="analyze-button" class="button button-primary" type="submit">
               <span>Analisar</span>
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" focusable="false">
